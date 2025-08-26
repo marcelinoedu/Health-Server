@@ -6,16 +6,14 @@ import (
 	"net/http"
 )
 
-// Payload recebido do app Android
 type Ingest struct {
 	Device string                   `json:"device"`
 	Source string                   `json:"source"`
 	Events []map[string]interface{} `json:"events"`
 }
 
-// Handler é o ponto de entrada da Vercel Function
 func Handler(w http.ResponseWriter, r *http.Request) {
-	// CORS básico (útil p/ testes web; para Android nativo não interfere)
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -40,11 +38,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
-
-		// limite defensivo de 5MB
 		r.Body = http.MaxBytesReader(w, r.Body, 5<<20)
 
 		var p Ingest
+
 		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
